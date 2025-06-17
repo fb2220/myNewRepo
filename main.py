@@ -1,5 +1,5 @@
-def print_hello():
-  print("Hello")
+def say_hello():
+    print("Hello, world!")
 
 
-print_hello()
+say_hello()
