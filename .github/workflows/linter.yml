@@ -1,10 +1,12 @@
 ---
 name: Lint Code Base
 
-on: push  # You can also add `pull_request` here if you want to lint PRs too
+on:
+  push
+  # pull_request  # ← Optional, uncomment if you want this on PRs too
 
 permissions:
-  contents: read  # ✅ Fixes CHECKOV security warning
+  contents: read  # ✅ Fixes Checkov warning about write permissions
 
 jobs:
   lint:
@@ -15,10 +17,22 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required so Super-Linter can detect changes properly
+          fetch-depth: 0
 
       - name: Lint Code Base
-        uses: super-linter/super-linter@v6.5.0  # ✅ Updated to maintained version
+        uses: super-linter/super-linter@v6.5.0
         env:
-          VALIDATE_ALL_CODEBASE: false  # Only lint changed files
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for Super-Linter
+          VALIDATE_ALL_CODEBASE: false
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync workflow to Port.io dashboard
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId: ${{ secrets.PORTCLIENTID }}           # ← Using your actual secret names
+          clientSecret: ${{ secrets.PORTCLIENTSECRET }}
+          baseUrl: https://api.port.io
+          operation: UPSERT
+          identifier: lint-${{ github.run_id }}
+          title: "Lint Code Base Run #${{ github.run_number }}"
+          blueprint: workflow_run
+          properties: '{}'
